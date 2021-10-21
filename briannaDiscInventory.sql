@@ -160,7 +160,7 @@ VALUES
 	('When Christmas Comes', '11-21-2011', 1, 2, 13),
 	('Better', '04-29-2016', 1, 3, 1),
 	('Wild-Eyed Southern Boys', '01-28-1981', 3, 4, 3),
-	('Taylor Swift', '10-24-2006', 1, 2, 8),
+	('Taylor Swift', '10-24-2006', 1, 4, 8),
 	('Evermore', '12-11-2020', 2, 4, 9),
 	('I Dont Dance', '09-09-1987', 1, 3, 8),
 	('Oracular Spectacular', '10-02-2007', 2, 4, 10),
@@ -244,6 +244,7 @@ VALUES
 	('08-19-2020', NULL, 3, 1),
 	('10-30-2020', NULL, 7, 5),
 	('05-15-2020', NULL, 9, 9),
+	('05-15-2020', NULL, 8, 9),
 	('06-15-2021', NULL, 11, 13),
 	('06-05-2018', NULL, 19, 2),
 	('09-06-2017', NULL, 20, 16),
@@ -293,7 +294,8 @@ VALUES
 --query list of disks on loan
 SELECT borrower_id, media_id, borrowed_date, returned_date
 FROM rental
-WHERE returned_date IS NULL;
+WHERE returned_date IS NULL
+ORDER BY media_id;
 
 /*
 select * from media;
@@ -306,3 +308,67 @@ select * from media;
 select * from rental;
 select * from borrower;
 */
+
+-----Project 4-----
+Use bri_disk_database;
+go
+-- 3) Show the disks in your database and any associated Individual artists only
+SELECT media_name, release_date, artist_name
+FROM media 
+	JOIN disk_artist ON disk_artist.media_id = media.media_id
+	JOIN artist ON artist.artist_id = disk_artist.artist_id
+WHERE artist_type_id = 1;
+go
+
+
+-- 4) Create a view called View_Individual_Artist that shows the artists’ names and not group names. Include the artist id in the view definition but do not display the id in your output
+DROP VIEW IF EXISTS view_individual_artist;
+go
+CREATE VIEW view_individual_artist
+AS
+	SELECT artist_name, artist_type_id
+	FROM artist
+	WHERE artist_type_id = 1;
+go
+SELECT artist_name FROM view_individual_artist;
+go
+
+-- 5) Show the disks in your database and any associated Group artists only
+SELECT media_name, release_date, artist_name
+	FROM media 
+		JOIN disk_artist ON disk_artist.media_id = media.media_id
+		JOIN artist ON artist.artist_id = disk_artist.artist_id
+	WHERE artist_type_id = 2;
+go
+
+-- 6) Re-write the previous query using the View_Individual_Artist view. Do not redefine the view. Consider using ‘NOT EXISTS’ or ‘NOT IN’ as the only restriction in the WHERE clause or a join. The output matches the output from the previous query.
+SELECT media_name, release_date, artist_name
+FROM media 
+	JOIN disk_artist ON disk_artist.media_id = media.media_id
+	JOIN artist ON artist.artist_id = disk_artist.artist_id
+WHERE artist_type_id NOT IN 
+	(SELECT artist_type_id 
+	FROM view_individual_artist);
+go
+
+--7) Show the borrowed disks and who borrowed them.
+SELECT TOP 100 PERCENT borrower_fname, borrower_lname, media_name, borrowed_date, returned_date
+FROM media 
+	JOIN rental ON rental.media_id = media.media_id
+	JOIN borrower ON borrower.borrower_id = rental.borrower_id
+ORDER BY borrower_lname;
+go
+
+-- 8) Show the number of times a disk has been borrowed
+SELECT media.media_id, media_name, COUNT(rental.media_id) AS TimesBorrowed
+FROM media
+	JOIN rental ON rental.media_id = media.media_id
+GROUP BY media.media_id, media_name
+
+-- 9) Show the disks outstanding or on-loan and who has each disk.
+SELECT media_name, borrowed_date, returned_date, borrower_lname
+FROM rental 
+	JOIN media ON rental.media_id = media.media_id
+	JOIN borrower ON borrower.borrower_id = rental.borrower_id
+WHERE returned_date IS NULL;
+go
