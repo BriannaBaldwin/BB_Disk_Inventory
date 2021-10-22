@@ -1,11 +1,13 @@
 /******************************************
  Date Created: 10/8/2021
- Date Last Modified: 10/15/2021
+ Date Last Modified: 10/21/2021
  Modified By: Brianna Baldiwn
  10/8/2021 - Initial implementation of disk db. Add users, grant permissions, add and create tables
  10/11/2021 - Changed artist_name data type to NCHAR
  10/14/2021 - Added inserts/data for media_type, status, genre, artist_type, and media | Made primary keys identifying
  10/15/2021 - Added inserts/data for borrower, artist, rental and disk_artist | Created a query for disks on loan
+ 10/19/2021 - made changes to SQL for disks on loan
+ 10/21/2021 - Add SQL for reports | created view for solo artists | add SQL to seperate artist first and last name
 *
 ********************************************/
 
@@ -76,7 +78,7 @@ CREATE TABLE media_type
 
  CREATE TABLE artist 
  (artist_id		INT			NOT NULL IDENTITY(1, 1) PRIMARY KEY,
- artist_name	NCHAR(50)	NOT NULL,
+ artist_name	NVARCHAR(50)	NOT NULL,
  artist_type_id	INT			NOT NULL,
  FOREIGN KEY (artist_type_id) REFERENCES artist_type (artist_type_id));
  go
@@ -233,7 +235,7 @@ VALUES
 	('Quinn XCII', 1),
 	('The Beatles', 2),
 	('4 Non Blondes', 2),
-	('Bon Jovi', 1),
+	('Bon Jovi', 2),
 	('John Legend', 1);
 
 -- rental inserts
@@ -313,46 +315,54 @@ select * from borrower;
 Use bri_disk_database;
 go
 -- 3) Show the disks in your database and any associated Individual artists only
-SELECT media_name, release_date, artist_name
+SELECT media_name AS 'Disk Name', release_date AS 'Release Date', 
+	IIF(CHARINDEX(' ', artist_name) > 0, LEFT(artist_name, CHARINDEX(' ', artist_name)), artist_name) as 'Artist First Name',
+	IIF(CHARINDEX(' ', artist_name) > 0, RIGHT(artist_name, LEN(artist_name) - CHARINDEX(' ', artist_name)), '') as 'Artist Last Name'
 FROM media 
 	JOIN disk_artist ON disk_artist.media_id = media.media_id
 	JOIN artist ON artist.artist_id = disk_artist.artist_id
-WHERE artist_type_id = 1;
+WHERE artist_type_id = 1
+ORDER BY 'Artist Last Name';
 go
 
 
 -- 4) Create a view called View_Individual_Artist that shows the artists’ names and not group names. Include the artist id in the view definition but do not display the id in your output
-DROP VIEW IF EXISTS view_individual_artist;
+DROP VIEW IF EXISTS View_Individual_Artist;
 go
-CREATE VIEW view_individual_artist
+CREATE VIEW View_Individual_Artist
 AS
-	SELECT artist_name, artist_type_id
+	SELECT artist_name, artist_id
 	FROM artist
 	WHERE artist_type_id = 1;
 go
-SELECT artist_name FROM view_individual_artist;
+SELECT IIF(CHARINDEX(' ', artist_name) > 0, LEFT(artist_name, CHARINDEX(' ', artist_name)), artist_name) as 'First Name',
+	IIF(CHARINDEX(' ', artist_name) > 0, RIGHT(artist_name, LEN(artist_name) - CHARINDEX(' ', artist_name)), '') as 'Last Name'
+FROM View_Individual_Artist
+ORDER BY 'Last Name';
 go
 
 -- 5) Show the disks in your database and any associated Group artists only
-SELECT media_name, release_date, artist_name
+SELECT media_name AS 'Disk Name', release_date AS 'Release Date', artist_name AS 'Group Name'
 	FROM media 
 		JOIN disk_artist ON disk_artist.media_id = media.media_id
 		JOIN artist ON artist.artist_id = disk_artist.artist_id
-	WHERE artist_type_id = 2;
+	WHERE artist_type_id = 2
+ORDER BY artist_name;
 go
 
 -- 6) Re-write the previous query using the View_Individual_Artist view. Do not redefine the view. Consider using ‘NOT EXISTS’ or ‘NOT IN’ as the only restriction in the WHERE clause or a join. The output matches the output from the previous query.
-SELECT media_name, release_date, artist_name
+SELECT media_name AS 'Disk Name', release_date AS 'Release Date', artist_name AS 'Group Name'
 FROM media 
 	JOIN disk_artist ON disk_artist.media_id = media.media_id
 	JOIN artist ON artist.artist_id = disk_artist.artist_id
-WHERE artist_type_id NOT IN 
-	(SELECT artist_type_id 
-	FROM view_individual_artist);
+WHERE artist.artist_id NOT IN 
+	(SELECT artist_id 
+	FROM View_Individual_Artist)
+ORDER BY artist_name;
 go
 
 --7) Show the borrowed disks and who borrowed them.
-SELECT TOP 100 PERCENT borrower_fname, borrower_lname, media_name, borrowed_date, returned_date
+SELECT TOP 100 PERCENT borrower_fname AS 'First', borrower_lname AS 'Last', media_name AS 'Disk Name', borrowed_date AS 'Borrowed Date', returned_date AS 'Returned Date'
 FROM media 
 	JOIN rental ON rental.media_id = media.media_id
 	JOIN borrower ON borrower.borrower_id = rental.borrower_id
@@ -360,15 +370,18 @@ ORDER BY borrower_lname;
 go
 
 -- 8) Show the number of times a disk has been borrowed
-SELECT media.media_id, media_name, COUNT(rental.media_id) AS TimesBorrowed
+SELECT media.media_id AS 'DiskId', media_name AS 'Disk Name', COUNT(rental.media_id) AS TimesBorrowed
 FROM media
 	JOIN rental ON rental.media_id = media.media_id
 GROUP BY media.media_id, media_name
+ORDER BY media.media_id;
+go
 
 -- 9) Show the disks outstanding or on-loan and who has each disk.
-SELECT media_name, borrowed_date, returned_date, borrower_lname
+SELECT media_name AS 'Disk Name', borrowed_date AS 'Borrowed', returned_date AS 'Returned', borrower_lname AS 'Last Name'
 FROM rental 
 	JOIN media ON rental.media_id = media.media_id
 	JOIN borrower ON borrower.borrower_id = rental.borrower_id
-WHERE returned_date IS NULL;
+WHERE returned_date IS NULL
+ORDER BY borrower_lname;
 go
