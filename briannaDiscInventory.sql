@@ -315,7 +315,7 @@ select * from borrower;
 Use bri_disk_database;
 go
 -- 3) Show the disks in your database and any associated Individual artists only
-SELECT media_name AS 'Disk Name', release_date AS 'Release Date', 
+SELECT media_name AS 'Disk Name', CONVERT(varchar, release_date, 101) AS 'Release Date', 
 	IIF(CHARINDEX(' ', artist_name) > 0, LEFT(artist_name, CHARINDEX(' ', artist_name)), artist_name) as 'Artist First Name',
 	IIF(CHARINDEX(' ', artist_name) > 0, RIGHT(artist_name, LEN(artist_name) - CHARINDEX(' ', artist_name)), '') as 'Artist Last Name'
 FROM media 
@@ -324,7 +324,6 @@ FROM media
 WHERE artist_type_id = 1
 ORDER BY 'Artist Last Name';
 go
-
 
 -- 4) Create a view called View_Individual_Artist that shows the artists’ names and not group names. Include the artist id in the view definition but do not display the id in your output
 DROP VIEW IF EXISTS View_Individual_Artist;
@@ -342,7 +341,7 @@ ORDER BY 'Last Name';
 go
 
 -- 5) Show the disks in your database and any associated Group artists only
-SELECT media_name AS 'Disk Name', release_date AS 'Release Date', artist_name AS 'Group Name'
+SELECT media_name AS 'Disk Name', CONVERT(varchar, release_date, 101) AS 'Release Date', artist_name AS 'Group Name'
 	FROM media 
 		JOIN disk_artist ON disk_artist.media_id = media.media_id
 		JOIN artist ON artist.artist_id = disk_artist.artist_id
@@ -351,7 +350,7 @@ ORDER BY artist_name;
 go
 
 -- 6) Re-write the previous query using the View_Individual_Artist view. Do not redefine the view. Consider using ‘NOT EXISTS’ or ‘NOT IN’ as the only restriction in the WHERE clause or a join. The output matches the output from the previous query.
-SELECT media_name AS 'Disk Name', release_date AS 'Release Date', artist_name AS 'Group Name'
+SELECT media_name AS 'Disk Name', CONVERT(varchar, release_date, 101) AS 'Release Date', artist_name AS 'Group Name'
 FROM media 
 	JOIN disk_artist ON disk_artist.media_id = media.media_id
 	JOIN artist ON artist.artist_id = disk_artist.artist_id
