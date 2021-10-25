@@ -1,13 +1,14 @@
 /******************************************
  Date Created: 10/8/2021
- Date Last Modified: 10/21/2021
+ Date Last Modified: 10/25/2021
  Modified By: Brianna Baldiwn
- 10/8/2021 - Initial implementation of disk db. Add users, grant permissions, add and create tables
+ 10/8/2021 - Initial implementation of disk db | Add users, grant permissions, add and create tables
  10/11/2021 - Changed artist_name data type to NCHAR
  10/14/2021 - Added inserts/data for media_type, status, genre, artist_type, and media | Made primary keys identifying
  10/15/2021 - Added inserts/data for borrower, artist, rental and disk_artist | Created a query for disks on loan
  10/19/2021 - made changes to SQL for disks on loan
  10/21/2021 - Add SQL for reports | created view for solo artists | add SQL to seperate artist first and last name
+ 10/25/2021 - Add insert and update for rental 
 *
 ********************************************/
 
@@ -384,3 +385,69 @@ FROM rental
 WHERE returned_date IS NULL
 ORDER BY borrower_lname;
 go
+
+--Week5 Day1 Lab, Ch15--
+--Create 2 stored procedures:
+	--Insert into rental. Parameters for all columns except the PK.  
+	--Include drop logic, error checking, and execution statements (1 that works & 1 that generates a user error).
+USE bri_disk_database;
+go
+DROP PROC IF EXISTS sp_Rental_Insert;
+GO
+CREATE PROC sp_Rental_Insert
+	@borrowed_date date, 
+	@media_id int,
+	@borrower_id int,
+	@returned_date date = NULL
+AS
+BEGIN TRY
+	INSERT INTO rental
+		(borrowed_date, media_id, borrower_id, returned_date)
+	VALUES
+		(@borrowed_date, @media_id, @borrower_id, @returned_date);
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not inserted.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH;
+GO
+
+EXEC sp_Rental_Insert '10-25-2021', 16, 16;
+GO
+EXEC sp_Rental_Insert '10-11-2021', 5, 5, '10-25-2021';
+GO
+EXEC sp_Rental_Insert '10-11-2021', 20, 100, '10-15-2021';
+GO
+
+--Update to rental. Accept all columns & updates based on the PK. Set a default value of null for the return date.
+DROP PROC IF EXISTS sp_Rental_Update;
+GO
+CREATE PROC sp_Rental_Update
+	@rental_id int,
+	@media_id int,
+	@borrower_id int,
+	@borrowed_date date, 
+	@returned_date date = NULL
+AS
+BEGIN TRY
+UPDATE rental
+	SET media_id = @media_id,
+		borrower_id = @borrower_id, 
+		borrowed_date = @borrowed_date, 
+		returned_date = @returned_date
+	WHERE rental_id = @rental_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Rental_Update 24, 3, 3, '3-3-2021', '5-5-2021';
+GO
+EXEC sp_Rental_Update  23, 4, 4, '4-4-2021';
+GO
+EXEC sp_Rental_Update  23, 4, 4444, '4-4-2021';
+GO
