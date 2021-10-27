@@ -9,6 +9,7 @@
  10/19/2021 - made changes to SQL for disks on loan
  10/21/2021 - Add SQL for reports | created view for solo artists | add SQL to seperate artist first and last name
  10/25/2021 - Add insert and update for rental 
+ 10/27/2021 - Add insert, update, delete sp for artist, borrower, and disk
 *
 ********************************************/
 
@@ -419,7 +420,8 @@ EXEC sp_Rental_Insert '10-11-2021', 5, 5, '10-25-2021';
 GO
 EXEC sp_Rental_Insert '10-11-2021', 20, 100, '10-15-2021';
 GO
-
+GRANT EXEC ON sp_Rental_Insert TO diskUserBB;
+GO
 --Update to rental. Accept all columns & updates based on the PK. Set a default value of null for the return date.
 DROP PROC IF EXISTS sp_Rental_Update;
 GO
@@ -445,9 +447,271 @@ BEGIN CATCH
 END CATCH
 GO
 
-EXEC sp_Rental_Update 24, 3, 3, '3-3-2021', '5-5-2021';
+EXEC sp_Rental_Update 25, 3, 3, '3-3-2021', '5-5-2021';
 GO
 EXEC sp_Rental_Update  23, 4, 4, '4-4-2021';
 GO
 EXEC sp_Rental_Update  23, 4, 4444, '4-4-2021';
+GO
+GRANT EXEC ON sp_Rental_Update TO diskUserBB;
+GO
+
+
+-----Project 5-----
+--2) artist
+--insert artist
+DROP PROC IF EXISTS sp_Artist_Insert;
+GO
+CREATE PROC sp_Artist_Insert
+	@artist_name nvarchar(50), 
+	@artist_type_id int
+AS
+BEGIN TRY
+INSERT INTO artist
+	(artist_name, artist_type_id)
+VALUES
+	(@artist_name, @artist_type_id);
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not inserted.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH;
+GO
+
+EXEC sp_Artist_Insert 'Eagles', 2;
+GO
+EXEC sp_Artist_Insert 'Dave Matthews Band', 22;
+GO
+
+GRANT EXEC ON sp_Artist_Insert TO diskUserBB;
+GO
+
+--Update artist
+DROP PROC IF EXISTS sp_Artist_Update;
+GO
+CREATE PROC sp_Artist_Update
+	@artist_id int,
+	@artist_name nvarchar(50), 
+	@artist_type_id int
+AS
+BEGIN TRY
+UPDATE artist
+	SET artist_name = @artist_name,
+		artist_type_id = @artist_type_id
+	WHERE artist_id = @artist_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Artist_Update 24, 'Eagles Update', 2;
+GO 
+EXEC sp_Artist_Update 2, 'Dave Matthews Band Update', 222;
+GO 
+
+GRANT EXEC ON sp_Artist_Update TO diskUserBB;
+GO
+
+--Delete artist
+DROP PROC IF EXISTS sp_Artist_Delete;
+GO
+CREATE PROC sp_Artist_Delete
+	@artist_id int
+AS
+BEGIN TRY
+	DELETE artist
+	WHERE artist_id = @artist_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Artist_Delete 24;
+GO 
+EXEC sp_Artist_Delete 20;
+GO 
+
+GRANT EXEC ON sp_Artist_Delete TO diskUserBB;
+GO
+
+--3) borrower
+--insert borrower
+DROP PROC IF EXISTS sp_Borrower_Insert;
+GO
+CREATE PROC sp_Borrower_Insert
+	@borrower_fname CHAR(30),
+	@borrower_lname CHAR(30),
+	@borrower_phone_num VARCHAR(15)
+AS
+BEGIN TRY
+INSERT INTO borrower
+	(borrower_fname, borrower_lname, borrower_phone_num)
+VALUES
+	(@borrower_fname, @borrower_lname, @borrower_phone_num);
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not inserted.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH;
+GO
+
+EXEC sp_Borrower_Insert 'Mr. ', 'Potatohead', '555-444-3333';
+GO 
+EXEC sp_Borrower_Insert 'Buzz', NULL, '555-444-3333';
+GO 
+GRANT EXEC ON sp_Borrower_Insert TO diskUserBB;
+GO
+
+--Update borrower
+DROP PROC IF EXISTS sp_Borrower_Update;
+GO
+CREATE PROC sp_Borrower_Update
+	@borrower_id int,
+	@borrower_fname CHAR(30),
+	@borrower_lname CHAR(30),
+	@borrower_phone_num VARCHAR(15)
+AS
+BEGIN TRY
+UPDATE borrower
+	SET borrower_fname = @borrower_fname,
+		borrower_lname = @borrower_lname,
+		borrower_phone_num = @borrower_phone_num
+	WHERE borrower_id = @borrower_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Borrower_Update 22, 'Update Mr. ', 'Potatohead', '333-444-5555';
+GO 
+EXEC sp_Borrower_Update 2, 'Buzz', 'Lightyear', NULL;
+GO 
+
+GRANT EXEC ON sp_Borrower_Update TO diskUserBB;
+GO
+
+--Delete borrower
+DROP PROC IF EXISTS sp_Borrower_Delete;
+GO
+CREATE PROC sp_Borrower_Delete
+	@borrower_id int
+AS
+BEGIN TRY
+	DELETE borrower
+	WHERE borrower_id = @borrower_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Borrower_Delete 22;
+GO 
+EXEC sp_Borrower_Delete 4;
+GO 
+GRANT EXEC ON sp_Borrower_Delete TO diskUserBB;
+GO
+
+--4) media
+--insert media
+DROP PROC IF EXISTS sp_Media_Insert;
+GO
+CREATE PROC sp_Media_Insert
+	@media_name CHAR(50),
+	@release_date DATE,
+	@media_type_id	INT,
+	@genre_id INT,
+	@status_id INT
+AS
+BEGIN TRY
+INSERT INTO media
+	(media_name, release_date, media_type_id, genre_id, status_id)
+VALUES
+	(@media_name, @release_date, @media_type_id, @genre_id, @status_id);
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not inserted.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH;
+GO
+
+EXEC sp_Media_Insert 'Hotel California', '12-08-2020', 3, 3, 3;
+GO 
+EXEC sp_Media_Insert 'Toy Story Songs', '11-22-1995', 1, 1, 6;
+GO 
+GRANT EXEC ON sp_Media_Insert TO diskUserBB;
+GO
+
+--Update media
+DROP PROC IF EXISTS sp_Media_Update;
+GO
+CREATE PROC sp_Media_Update
+	@media_id INT,
+	@media_name CHAR(50),
+	@release_date DATE,
+	@media_type_id	INT,
+	@genre_id INT,
+	@status_id INT
+AS
+BEGIN TRY
+UPDATE media
+	SET media_name = @media_name,
+		release_date = @release_date,
+		media_type_id = @media_type_id,
+		genre_id = @genre_id,
+		status_id = @status_id
+	WHERE media_id = @media_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Media_Update 26, 'Update Hotel California', '12-08-1976', 3, 3, 3;
+GO 
+EXEC sp_Media_Update 2, 'Toy Story Songs', '11-22-1995', 1, 1, 6;
+GO 
+
+GRANT EXEC ON sp_Media_Update TO diskUserBB;
+GO
+
+--Delete media
+DROP PROC IF EXISTS sp_Media_Delete;
+GO
+CREATE PROC sp_Media_Delete
+	@media_id INT
+AS
+BEGIN TRY
+	DELETE media
+	WHERE media_id = @media_id;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred. Row was not updated.';
+    PRINT 'Error number: ' + CONVERT(varchar, ERROR_NUMBER());
+	PRINT 'Error message: ' + CONVERT(varchar(255), ERROR_MESSAGE());
+END CATCH
+GO
+
+EXEC sp_Media_Delete 26;
+GO 
+EXEC sp_Media_Delete 4;
+GO 
+
+GRANT EXEC ON sp_Media_Delete TO diskUserBB;
 GO
