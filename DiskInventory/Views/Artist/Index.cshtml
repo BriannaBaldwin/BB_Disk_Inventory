@@ -1,0 +1,25 @@
+﻿@model List<Artist>
+@{
+    ViewBag.Title = "Artist Manager";
+}
+
+<h1>@ViewBag.Title</h1>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Artist ID</th>
+            <th>Name</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var artist in Model)
+        {
+        <tr>
+            <td>@artist.ArtistId</td>
+            <td>@artist.ArtistName</td>
+            <td>@artist.ArtistTypeId</td>
+        </tr>            
+        }
+    </tbody>
+</table>

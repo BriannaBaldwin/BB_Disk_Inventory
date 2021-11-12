@@ -1,0 +1,32 @@
+﻿@model List<Medium>
+@{
+    ViewBag.Title = "Media Manager";
+}
+
+<h1>@ViewBag.Title</h1>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Media Id</th>
+            <th>Name</th>
+            <th>Release Date</th>
+            <th>Type</th>
+            <th>Genre</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var media in Model)
+        {
+        <tr>
+            <td>@media.MediaId</td>
+            <td>@media.MediaName</td>
+            <td>@media.ReleaseDate</td>
+            <td>@media.MediaTypeId</td>
+            <td>@media.GenreId</td>
+            <td>@media.StatusId</td>
+
+        </tr>
+        }
+    </tbody>
+</table>

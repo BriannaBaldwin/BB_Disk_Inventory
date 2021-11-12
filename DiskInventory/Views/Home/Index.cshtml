@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Bri's Bops:<br />Inventory Manager</h1>
+    <p>Welcome to the inventory manager for Bri's Bops.</p>
+    @*<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
+    <h3>Admin</h3>
+    <div class="list-group">
+        <a asp-controller="Artist" asp-action="Index" class="list-group-item">
+            Manage Artists
+        </a>
+        <a asp-controller="Borrower" asp-action="Index" class="list-group-item">
+            Manage Borrowers
+        </a>
+        <a asp-controller="Media" asp-action="Index" class="list-group-item">
+            Manage Media
+        </a>
+    </div>
+</div>
