@@ -4,11 +4,12 @@
 }
 
 <h1>@ViewBag.Title</h1>
+<a asp-controller="Media" asp-action="Add">Add a media item</a>
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Media Id</th>
-            <th>Name</th>
+            <th>Media Name</th>
             <th>Release Date</th>
             <th>Type</th>
             <th>Genre</th>
@@ -25,6 +26,14 @@
             <td>@media.MediaTypeId</td>
             <td>@media.GenreId</td>
             <td>@media.StatusId</td>
+            <td>
+                <a asp-controller="Media" asp-action="Edit"
+                   asp-route-id="@media.MediaId">Edit</a>
+            </td>
+            <td>
+                <a asp-controller="Media" asp-action="Delete"
+                   asp-route-id="@media.MediaId">Delete</a>
+            </td>
 
         </tr>
         }
