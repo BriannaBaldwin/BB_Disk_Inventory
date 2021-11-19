@@ -1,4 +1,9 @@
-﻿using DiskInventory.Models;
+﻿/* Created: 11/12/2021
+ * Created By: Brianna Baldwin
+ * Mod Log:
+ *      11/12/2021 - Created HomeController | Added Link to Index
+ */
+using DiskInventory.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
