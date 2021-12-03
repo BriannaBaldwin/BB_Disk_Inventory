@@ -1,0 +1,35 @@
+﻿@model List<Rental>
+@{
+    ViewBag.Title = "Rental Manager";
+}
+
+<h1>@ViewBag.Title</h1>
+<a asp-controller="Rental" asp-action="Add">Add a Rental</a>
+<br />
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Media Name</th>
+            <th>Borrower First Name</th>
+            <th>Borrower Last Name</th>
+            <th>Borrowed Date</th>
+            <th>Returned Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rental in Model)
+        {
+            <tr>
+                <td>@rental.Media.MediaName</td>
+                <td>@rental.Borrower.BorrowerFname</td>
+                <td>@rental.Borrower.BorrowerLname</td>
+                <td>@rental.BorrowedDate</td>
+                <td>@rental.ReturnedDate</td>
+                <td>
+                    <a asp-controller="Rental" asp-action="Edit"
+                       asp-route-id="@rental.RentalId">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

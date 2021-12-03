@@ -17,7 +17,7 @@ namespace DiskInventory.Models
         [Required(ErrorMessage = "Please enter artist name.")]
         public string ArtistName { get; set; }
         [Required(ErrorMessage = "Please choose artist type.")]
-        public int ArtistTypeId { get; set; }
+        public int? ArtistTypeId { get; set; }
 
         public virtual ArtistType ArtistType { get; set; }
         public virtual ICollection<DiskArtist> DiskArtists { get; set; }

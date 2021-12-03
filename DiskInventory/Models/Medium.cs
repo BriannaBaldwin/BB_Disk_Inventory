@@ -21,11 +21,11 @@ namespace DiskInventory.Models
         [Range(typeof(DateTime), "1/1/1950", "1/1/2050", ErrorMessage = "Year must be after 1950 and before 2050.")]
         public DateTime ReleaseDate { get; set; }
         [Required(ErrorMessage = "Please choose media type.")]
-        public int MediaTypeId { get; set; }
+        public int? MediaTypeId { get; set; }
         [Required(ErrorMessage = "Please choose genre.")]
-        public int GenreId { get; set; }
+        public int? GenreId { get; set; }
         [Required(ErrorMessage = "Please choose status.")]
-        public int StatusId { get; set; }
+        public int? StatusId { get; set; }
 
         public virtual Genre Genre { get; set; }
         public virtual MediaType MediaType { get; set; }

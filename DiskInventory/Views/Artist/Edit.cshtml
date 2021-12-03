@@ -13,7 +13,7 @@
     <div class="form-group">
         <label asp-for="ArtistTypeId">Artist Type</label>
         <select asp-for="ArtistTypeId" class="form-control">
-            <option value="Select a type">Select a type</option>
+            <option value="">Select a type</option>
             @foreach (ArtistType t in ViewBag.ArtistTypes)
             {
                 <option value="@t.ArtistTypeId">@t.Description</option>

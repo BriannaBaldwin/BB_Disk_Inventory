@@ -32,7 +32,9 @@ namespace DiskInventory.Controllers
             ViewBag.MediaTypes = context.MediaTypes.OrderBy(t => t.Description).ToList();
             ViewBag.Statuses = context.Statuses.OrderBy(s => s.Description).ToList();
             ViewBag.Genres = context.Genres.OrderBy(g => g.Description).ToList();
-            return View("Edit", new Medium());
+            Medium newMedia = new Medium();
+            newMedia.ReleaseDate = DateTime.Today;
+            return View("Edit", newMedia);
         }
         [HttpGet]
         public IActionResult Edit(int id)
