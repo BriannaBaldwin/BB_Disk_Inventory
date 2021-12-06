@@ -715,3 +715,31 @@ GO
 
 GRANT EXEC ON sp_Media_Delete TO diskUserBB;
 GO
+
+--Add permissions to stored procs for BookUser
+USE bri_disk_database
+GO
+CREATE USER [ServerB01\BooksUser] FOR LOGIN [ServerB01\BooksUser] WITH DEFAULT_SCHEMA=[dbo]
+
+GRANT EXEC ON sp_Artist_Insert To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Artist_Update To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Artist_Delete To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Borrower_Insert To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Borrower_Update To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Borrower_Delete To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Media_Insert To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Media_Update To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Media_Delete To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Rental_Insert To [ServerB01\BooksUser];
+GO
+GRANT EXEC ON sp_Rental_Update To [ServerB01\BooksUser];
+GO
