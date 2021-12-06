@@ -3,12 +3,14 @@
  * Mod Log:
  *      11/12/2021 - Created ArtistController | Added Link to Index
  *      11/19/2021 - Added Add, Edit and Delete actions
+ *      12/06/2021 - Reference stored procedures
  */
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using DiskInventory.Models;
 
 namespace DiskInventory.Controllers
@@ -22,7 +24,8 @@ namespace DiskInventory.Controllers
         }
         public IActionResult Index()
         {
-            List<Artist> artists = context.Artists.OrderBy(a => a.ArtistName).ToList();
+            //List<Artist> artists = context.Artists.OrderBy(a => a.ArtistName).ToList();
+            var artists = context.Artists.OrderBy(n => n.ArtistName).ToList();
             return View(artists);
         }
         [HttpGet]
@@ -47,13 +50,16 @@ namespace DiskInventory.Controllers
             {
                 if (artist.ArtistId == 0)
                 {
-                    context.Artists.Add(artist);
+                    //context.Artists.Add(artist);
+                    context.Database.ExecuteSqlRaw("execute sp_Artist_Insert @p0, @p1",
+                        parameters: new[] { artist.ArtistName, artist.ArtistTypeId.ToString() });
                 }
                 else
                 {
-                    context.Artists.Update(artist);
+                    //context.Artists.Update(artist);
+                    context.Database.ExecuteSqlRaw("execute sp_Artist_Update @p0, @p1, @p2",
+                        parameters: new[] { artist.ArtistId.ToString(), artist.ArtistName, artist.ArtistTypeId.ToString() });
                 }
-                context.SaveChanges();
                 return RedirectToAction("Index", "Artist");
             }
             else
@@ -72,8 +78,10 @@ namespace DiskInventory.Controllers
         [HttpPost]
         public IActionResult Delete(Artist artist)
         {
-            context.Artists.Remove(artist);
-            context.SaveChanges();
+            //context.Artists.Remove(artist);
+            //context.SaveChanges();
+            context.Database.ExecuteSqlRaw("execute sp_Artist_Delete @p0",
+                parameters: new[] { artist.ArtistId.ToString() });
             return RedirectToAction("Index", "Artist");
         }
     }

@@ -3,6 +3,7 @@
  * Mod Log:
  *      11/12/2021 - Created MediaController | Added Link to Index
  *      11/19/2021 - Added Add, Edit and Delete actions
+ *      12/06/2021 - Reference stored procedures
  */
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DiskInventory.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiskInventory.Controllers
 {
@@ -53,13 +55,17 @@ namespace DiskInventory.Controllers
             {
                 if (media.MediaId == 0)
                 {
-                    context.Media.Add(media);
+                    //context.Media.Add(media);
+                    context.Database.ExecuteSqlRaw("execute sp_Media_Insert @p0, @p1, @p2, @p3, @p4",
+                        parameters: new[] { media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
                 }
                 else
                 {
-                    context.Media.Update(media);
+                    //context.Media.Update(media);
+                    context.Database.ExecuteSqlRaw("execute sp_Media_Update @p0, @p1, @p2, @p3, @p4, @p5",
+                        parameters: new[] { media.MediaId.ToString(), media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
                 }
-                context.SaveChanges();
+                //context.SaveChanges();
                 return RedirectToAction("Index", "Media");
             }
             else
@@ -80,8 +86,10 @@ namespace DiskInventory.Controllers
         [HttpPost]
         public IActionResult Delete(Medium media)
         {
-            context.Media.Remove(media);
-            context.SaveChanges();
+            //context.Media.Remove(media);
+            //context.SaveChanges();
+            context.Database.ExecuteSqlRaw("execute sp_Media_Delete @p0",
+                parameters: new[] { media.MediaId.ToString() });
             return RedirectToAction("Index", "Media");
         }
     }

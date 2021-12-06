@@ -1,4 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿/* Created: 11/12/2021
+ * Created By: Brianna Baldwin
+ * Mod Log:
+ *      12/03/2021 - Created RentalController | Added Link to Index | Added Add and Update actions
+ *      12/06/2021 - Reference stored procedures
+ */
+
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,15 +54,21 @@ namespace DiskInventory.Controllers
         {
             if (ModelState.IsValid)
             {
+                var returnedDate = rental.ReturnedDate.ToString();
+                returnedDate = (returnedDate == "") ? null : rental.ReturnedDate.ToString();
                 if (rental.RentalId == 0)
                 {
-                    context.Rentals.Add(rental);
+                    //context.Rentals.Add(rental);
+                    context.Database.ExecuteSqlRaw("execute sp_Rental_Insert @p0, @p1, @p2, @p3",
+                        parameters: new[] { rental.BorrowedDate.ToString(), rental.MediaId.ToString(), rental.BorrowerId.ToString(), returnedDate });
                 }
                 else
                 {
-                    context.Rentals.Update(rental);
+                    //context.Rentals.Update(rental);
+                    context.Database.ExecuteSqlRaw("execute sp_Rental_Update @p0, @p1, @p2, @p3, @p4",
+                        parameters: new[] { rental.RentalId.ToString(), rental.MediaId.ToString(), rental.BorrowerId.ToString(), rental.BorrowedDate.ToString(), returnedDate });
                 }
-                context.SaveChanges();
+                //context.SaveChanges();
                 return RedirectToAction("Index", "Rental");
             }
             else
