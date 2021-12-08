@@ -4,6 +4,7 @@
  *      11/12/2021 - Created MediaController | Added Link to Index
  *      11/19/2021 - Added Add, Edit and Delete actions
  *      12/06/2021 - Reference stored procedures
+ *      12/08/2021 - Added TempData for success message
  */
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -24,7 +25,8 @@ namespace DiskInventory.Controllers
         }
         public IActionResult Index()
         {
-            List<Medium> media = context.Media.OrderBy(b => b.MediaName).ToList();
+            //List<Medium> media = context.Media.OrderBy(b => b.MediaName).ToList();
+            var media = context.Media.OrderBy(n => n.MediaName).Include(t => t.MediaType).Include(s => s.Status).Include(g => g.Genre).ToList();
             return View(media);
         }
         [HttpGet]
@@ -58,12 +60,14 @@ namespace DiskInventory.Controllers
                     //context.Media.Add(media);
                     context.Database.ExecuteSqlRaw("execute sp_Media_Insert @p0, @p1, @p2, @p3, @p4",
                         parameters: new[] { media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
+                    TempData["message"] = $"{media.MediaName} added to your Media";
                 }
                 else
                 {
                     //context.Media.Update(media);
                     context.Database.ExecuteSqlRaw("execute sp_Media_Update @p0, @p1, @p2, @p3, @p4, @p5",
                         parameters: new[] { media.MediaId.ToString(), media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
+                    TempData["message"] = $"{media.MediaName} has been updated";
                 }
                 //context.SaveChanges();
                 return RedirectToAction("Index", "Media");
@@ -90,6 +94,7 @@ namespace DiskInventory.Controllers
             //context.SaveChanges();
             context.Database.ExecuteSqlRaw("execute sp_Media_Delete @p0",
                 parameters: new[] { media.MediaId.ToString() });
+            TempData["message"] = "Media deleted";
             return RedirectToAction("Index", "Media");
         }
     }

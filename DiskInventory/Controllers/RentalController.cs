@@ -3,6 +3,7 @@
  * Mod Log:
  *      12/03/2021 - Created RentalController | Added Link to Index | Added Add and Update actions
  *      12/06/2021 - Reference stored procedures
+ *      12/08/2021 - Added TempData for success message | Added if logic to display in Media if media is on loan or available
  */
 
 using Microsoft.AspNetCore.Mvc;
@@ -61,12 +62,44 @@ namespace DiskInventory.Controllers
                     //context.Rentals.Add(rental);
                     context.Database.ExecuteSqlRaw("execute sp_Rental_Insert @p0, @p1, @p2, @p3",
                         parameters: new[] { rental.BorrowedDate.ToString(), rental.MediaId.ToString(), rental.BorrowerId.ToString(), returnedDate });
+                    
+                    //update the status for this disk if return date is null set to 'On Loan'
+                    var media = context.Media.Find(rental.MediaId);
+                    if (returnedDate == null)
+                    {
+                        media.StatusId = 4;
+                        context.Database.ExecuteSqlRaw("execute sp_Media_Update @p0, @p1, @p2, @p3, @p4, @p5",
+                            parameters: new[] { media.MediaId.ToString(), media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
+                    }
+                    else
+                    {
+                        media.StatusId = 1;
+                        context.Database.ExecuteSqlRaw("execute sp_Media_Update @p0, @p1, @p2, @p3, @p4, @p5",
+                            parameters: new[] { media.MediaId.ToString(), media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
+                    }
+                    TempData["message"] = $"Rental for '{media.MediaName}' has been added";
                 }
                 else
                 {
                     //context.Rentals.Update(rental);
                     context.Database.ExecuteSqlRaw("execute sp_Rental_Update @p0, @p1, @p2, @p3, @p4",
                         parameters: new[] { rental.RentalId.ToString(), rental.MediaId.ToString(), rental.BorrowerId.ToString(), rental.BorrowedDate.ToString(), returnedDate });
+                    
+                    //update the status for this disk if return date is null set to 'On Loan'
+                    var media = context.Media.Find(rental.MediaId);
+                    if (returnedDate == null)
+                    {
+                        media.StatusId = 4;
+                        context.Database.ExecuteSqlRaw("execute sp_Media_Update @p0, @p1, @p2, @p3, @p4, @p5",
+                            parameters: new[] { media.MediaId.ToString(), media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
+                    }
+                    else
+                    {
+                        media.StatusId = 1;
+                        context.Database.ExecuteSqlRaw("execute sp_Media_Update @p0, @p1, @p2, @p3, @p4, @p5",
+                            parameters: new[] { media.MediaId.ToString(), media.MediaName, media.ReleaseDate.ToString(), media.MediaTypeId.ToString(), media.GenreId.ToString(), media.StatusId.ToString() });
+                    }
+                    TempData["message"] = $"Rental for '{media.MediaName}' has been updated";
                 }
                 //context.SaveChanges();
                 return RedirectToAction("Index", "Rental");

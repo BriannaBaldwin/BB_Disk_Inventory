@@ -4,6 +4,7 @@
  *      11/12/2021 - Created BorrowerController | Added Link to Index
  *      12/03/2021 - Added Add, Update, and Delete actions
  *      12/06/2021 - Reference stored procedures
+ *      12/08/2021 - Added TempData for success message
  */
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -49,12 +50,14 @@ namespace DiskInventory.Controllers
                     //context.Borrowers.Add(borrower);
                     context.Database.ExecuteSqlRaw("execute sp_Borrower_Insert @p0, @p1, @p2",
                         parameters: new[] { borrower.BorrowerFname, borrower.BorrowerLname, borrower.BorrowerPhoneNum.ToString() });
+                    TempData["message"] = $"{borrower.BorrowerFname + ' ' + borrower.BorrowerLname} added to your Borrowers";
                 }
                 else
                 {
                     //context.Borrowers.Update(borrower);
                     context.Database.ExecuteSqlRaw("execute sp_Borrower_Update @p0, @p1, @p2, @p3",
                         parameters: new[] { borrower.BorrowerId.ToString(), borrower.BorrowerFname, borrower.BorrowerLname, borrower.BorrowerPhoneNum.ToString() });
+                    TempData["message"] = $"{borrower.BorrowerFname + ' ' + borrower.BorrowerLname} has been updated";
                 }
                 //context.SaveChanges();
                 return RedirectToAction("Index", "Borrower");
@@ -78,6 +81,7 @@ namespace DiskInventory.Controllers
             //context.SaveChanges();
             context.Database.ExecuteSqlRaw("execute sp_Borrower_Delete @p0",
                 parameters: new[] { borrower.BorrowerId.ToString() });
+            TempData["message"] = "Borrower deleted";
             return RedirectToAction("Index", "Borrower");
         }
     }
